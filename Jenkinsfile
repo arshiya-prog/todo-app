@@ -5,37 +5,30 @@ pipeline {
         APP_NAME = "todo-app"
         IMAGE_NAME = "todo-app:latest"
         KUBE_DIR = "kubernetes"
-        MINIKUBE_DOCKER_ENV = "eval \$(minikube docker-env)"
+
+        // Full paths to binaries
+        DOCKER = "/usr/local/bin/docker"
+        MINIKUBE = "/opt/homebrew/bin/minikube"
     }
 
     stages {
 
-        stage('Prepare') {
+        stage('Clean Previous Image') {
             steps {
-                echo "Cleaning previous builds..."
-                sh 'docker image rm -f $IMAGE_NAME || true'
+                echo "Cleaning old image (if exists)..."
+                sh '''
+                    eval $("${MINIKUBE}" docker-env)
+                    ${DOCKER} image rm -f ${IMAGE_NAME} || true
+                '''
             }
         }
 
-        stage('Set Docker Env to Minikube') {
-            steps {
-                echo 'Configuring Docker to use Minikube Docker daemon...'
-                script {
-                    def dockerEnv = sh(script: "${MINIKUBE_DOCKER_ENV} && env", returnStdout: true).trim()
-                    def envVars = dockerEnv.split("\n").collect { it.split("=", 2) }.findAll { it.size() == 2 }
-                    envVars.each { envVar ->
-                        env[envVar[0]] = envVar[1]
-                    }
-                }
-            }
-        }
-
-        stage('Build Docker Image Inside Minikube') {
+        stage('Build Docker Image (Inside Minikube)') {
             steps {
                 echo 'Building Docker image using Minikube Docker daemon...'
                 sh '''
-                    eval $(/opt/homebrew/bin/minikube docker-env)
-                    /usr/local/bin/docker build -t $IMAGE_NAME .
+                    eval $("${MINIKUBE}" docker-env)
+                    ${DOCKER} build -t ${IMAGE_NAME} .
                 '''
             }
         }
@@ -50,13 +43,12 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                echo 'Waiting for pods to be ready...'
+                echo 'Verifying deployment...'
                 sh 'kubectl rollout status deployment/${APP_NAME}-deployment'
                 sh 'kubectl get pods'
                 sh 'kubectl get svc'
             }
         }
-
     }
 
     post {
@@ -64,7 +56,7 @@ pipeline {
             echo "✅ Successfully deployed $APP_NAME to Minikube!"
         }
         failure {
-            echo "❌ Deployment failed. Check logs for details."
+            echo "❌ Deployment failed. Check logs above for errors."
         }
     }
 }
