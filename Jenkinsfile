@@ -30,9 +30,13 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker Image Inside Minikube') {
             steps {
-                sh '/usr/local/bin/docker build -t todo-app:latest .'
+                echo 'Building Docker image using Minikube Docker daemon...'
+                sh '''
+                    eval $(minikube docker-env)
+                    /usr/local/bin/docker build -t $IMAGE_NAME .
+                '''
             }
         }
 
