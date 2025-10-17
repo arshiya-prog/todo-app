@@ -5,6 +5,7 @@ pipeline {
         APP_NAME = "todo-app"
         IMAGE_TAG = "latest"
         IMAGE_NAME = "todo-app"
+        K8S_DEPLOYMENT = "todo-app-deployment"
         KUBE_DIR = "kubernetes"
         DOCKER = "/usr/local/bin/docker"
         MINIKUBE = "/opt/homebrew/bin/minikube"
