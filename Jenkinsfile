@@ -26,7 +26,7 @@ pipeline {
         stage('Build Docker Image (Inside Minikube)') {
             steps {
                 script {
-                    def imageTag = "${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    def imageTag = "todo-app:${env.BUILD_NUMBER}"
                     sh "docker build -t ${imageTag} ."
                     
                     // Load into Minikube's Docker registry
