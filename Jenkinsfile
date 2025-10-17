@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         APP_NAME = "todo-app"
-        IMAGE_NAME = "todo-app:latest"
+        IMAGE_TAG = "latest"
+        IMAGE_NAME = "todo-app"
         KUBE_DIR = "kubernetes"
-
-        // Full paths to binaries
         DOCKER = "/usr/local/bin/docker"
         MINIKUBE = "/opt/homebrew/bin/minikube"
     }
+
 
     stages {
 
