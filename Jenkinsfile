@@ -25,11 +25,16 @@ pipeline {
 
         stage('Build Docker Image (Inside Minikube)') {
             steps {
-                echo 'Building Docker image using Minikube Docker daemon...'
-                sh '''
-                    eval $("${MINIKUBE}" docker-env)
-                    ${DOCKER} build -t ${IMAGE_NAME} .
-                '''
+                script {
+                    def imageTag = "${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker build -t ${imageTag} ."
+                    
+                    // Load into Minikube's Docker registry
+                    sh "minikube image load ${imageTag}"
+
+                    // Update deployment to use new image
+                    sh "kubectl set image deployment/${K8S_DEPLOYMENT} ${IMAGE_NAME}=${imageTag}"
+                }
             }
         }
 
