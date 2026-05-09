@@ -55,8 +55,8 @@ todo-app/
 │── Dockerfile
 │── Jenkinsfile
 │── app.py
-│── requirements.txt
-
+└── requirements.txt
+```
 
 ## Author:
 Arshiya Uppal
